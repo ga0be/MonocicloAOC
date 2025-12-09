@@ -1,0 +1,104 @@
+module mips_top (
+    input clk,
+    input reset,
+    output [31:0] pc_out,
+    output [31:0] alu_out,
+    output [31:0] mem_out
+);
+   o
+    wire [31:0] pc_next, pc_current, instruction;
+    wire [31:0] read_data1, read_data2, write_data;
+    wire [31:0] sign_extended, alu_b, mem_read_data;
+    wire [3:0] alu_control;
+    wire [4:0] write_reg;
+    wire zero, reg_dst, branch, mem_read, mem_to_reg, mem_write, alu_src, reg_write, jump, jal, jr;
+    wire [1:0] alu_op;
+    
+  
+    pc program_counter (
+        .clk(clk),
+        .reset(reset),
+        .next_pc(pc_next),
+        .current_pc(pc_current)
+    );
+    
+    imem instruction_memory (
+        .address(pc_current),
+        .instruction(instruction)
+    );
+    
+    regfile register_file (
+        .clk(clk),
+        .reset(reset),
+        .reg_write(reg_write),
+        .read_addr1(instruction[25:21]),
+        .read_addr2(instruction[20:16]),
+        .write_addr(write_reg),
+        .write_data(write_data),
+        .read_data1(read_data1),
+        .read_data2(read_data2)
+    );
+    
+    alu arithmetic_logic_unit (
+        .a(read_data1),
+        .b(alu_b),
+        .alu_control(alu_control),
+        .result(alu_out),
+        .zero(zero)
+    );
+    
+    alu_ctrl alu_control_unit (
+        .alu_op(alu_op),
+        .funct(instruction[5:0]),
+        .alu_control(alu_control)
+    );
+    
+    control_unit control (
+        .opcode(instruction[31:26]),
+        .reg_dst(reg_dst),
+        .branch(branch),
+        .mem_read(mem_read),
+        .mem_to_reg(mem_to_reg),
+        .alu_op(alu_op),
+        .mem_write(mem_write),
+        .alu_src(alu_src),
+        .reg_write(reg_write),
+        .jump(jump),
+        .jal(jal),
+        .jr(jr)
+    );
+    
+    dmem data_memory (
+        .clk(clk),
+        .mem_read(mem_read),
+        .mem_write(mem_write),
+        .address(alu_out),
+        .write_data(read_data2),
+        .read_data(mem_read_data)
+    );
+    
+    sign_extend sign_extension (
+        .immediate(instruction[15:0]),
+        .extended(sign_extended)
+    );
+    
+    //somadores e multiplexadores
+    assign write_reg = reg_dst ? instruction[15:11] : instruction[20:16];
+    assign alu_b = alu_src ? sign_extended : read_data2;
+    assign write_data = mem_to_reg ? mem_read_data : alu_out;
+    
+    
+    wire [31:0] pc_plus4 = pc_current + 4;
+    wire [31:0] branch_target = pc_plus4 + (sign_extended << 2);
+    wire [31:0] jump_target = {pc_plus4[31:28], instruction[25:0], 2'b00};
+    wire branch_taken = branch & zero;
+    
+    assign pc_next = jr ? read_data1 :
+                    jump ? jump_target :
+                    branch_taken ? branch_target :
+                    pc_plus4;
+    
+    // Saídas para depuração
+    assign pc_out = pc_current;
+    assign mem_out = mem_read_data;
+endmodule
