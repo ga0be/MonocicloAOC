@@ -15,10 +15,11 @@ module i_mem #(
 
     // Carrega as instruções a partir do arquivo instructions.list
     initial begin
-        $readmemb("RandomNumbers.list", memoria);
+        $readmemb("instructions.list", memoria);
     end
 
     // Leitura assíncrona da memória (com divisão por 4 para alinhar por palavra)
     assign i_out = memoria[address >> 2];
+
 
 endmodule
