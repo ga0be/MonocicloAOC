@@ -6,7 +6,7 @@ module mips_top(clock, reset, PC_out, ULA_out, d_mem_out);
 
 	// Entradas e saídas do Top Level
 	input wire clock, reset; // clock e reset
-	output wire [31:0] PC_out, ULA_out, d_mem_out; //remover as ulas dps	
+	output wire [31:0] PC_out, ULA_out, d_mem_out; 	
 	
 	
 	
@@ -197,3 +197,4 @@ module mips_top(clock, reset, PC_out, ULA_out, d_mem_out);
 
 
 endmodule
+
