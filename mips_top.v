@@ -32,6 +32,10 @@ module mips_top(clock, reset, PC_out, ULA_out, d_mem_out);
 	// ####### Cabos da ULA Control #######
 	wire [3:0] cabo_ALU_ctrl_out; 	// saida do controle da ULA
 	wire shamt; 							// shift amount
+
+	// ####### Cabos de saída de dados na memória(seja ela ROM ou RAM) #######
+	wire [31:0] cabo_i_mem_out; 	// saida de instruction memory
+	wire [31:0] cabo_d_mem_out; 	// saida do data memory
 	
 	
 	// ####### Cabos para o funcionamento do Sign Extend #######
@@ -54,12 +58,6 @@ module mips_top(clock, reset, PC_out, ULA_out, d_mem_out);
 	
 	wire [31:0] cabo_mux_regfile_dst; 		// cabo do mux RegDst -> Decidir WriteRegister
 	wire [31:0] mux_MemToReg; 					// cabo do mux MemToReg -> Ir para o WriteData
-
-
-	
-	// ####### Cabos de saída de dados na memória(seja ela ROM ou RAM) #######
-	wire [31:0] cabo_i_mem_out; 	// saida de instruction memory
-	wire [31:0] cabo_d_mem_out; 	// saida do data memory
 	
 	
 	// ####### Sinais de Controle #######
@@ -195,6 +193,7 @@ module mips_top(clock, reset, PC_out, ULA_out, d_mem_out);
 	assign PC_out = cabo_PC_out; // saida do PC
 	assign d_mem_out = cabo_d_mem_out; // saida do data memory
 	assign ULA_out = ALU_result; // saida da ULA 
+
 
 
 endmodule
