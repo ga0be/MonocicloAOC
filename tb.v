@@ -3,43 +3,59 @@
 
 module tb;
 
-  // Entradas
+//Entradas e saídas
   reg clock;
   reg reset;
-
-  // Saídas
-
   wire [31:0] ULA_out;
-  wire [31:0] d_mem_out;
   wire [31:0] PC_out;
-
-  // Instanciando o módulo top-level
+  
   mips_top uut (
     .clock(clock),
     .reset(reset),
-    .ULA_out(ALU_out),
-    .d_mem_out(d_mem_out),
+    .ULA_out(ULA_out),
     .PC_out(PC_out)
   );
-
-  // Geração de clock
+  
+  // Clock
   initial begin
     clock = 0;
-    forever #10 clock = ~clock; // Clock com período de 20ns
+    forever #10 clock = ~clock;
   end
-
-  // Teste inicial
+  
+  // Teste
   initial begin
-    // Inicializa os sinais
+    // 1. Cria waveform
+    $dumpfile("WaveformTest.vcd");
+    $dumpvars(0, tb);
+    
+    // 2. Reset
     reset = 1;
-    #25;
-    reset = 0;
-
-    // Simulação roda por 5000ns
-    #5000;
-
-    // Encerra simulação
-    $stop;
-	 end
-
+    #25 reset = 0;
+    
+    // 3. Monitorando PC e ULA nos primeiros ciclos
+    $display("\n------ MONITORANDO PRIMEIROS CICLOS -------");
+    $display("Tempo |   PC   |   ULA");
+    
+    // Verificando primeiras instruções
+    #40;  // Primeira instrução após reset
+    $display("%4tns | %h | %h", $time, PC_out, ULA_out);
+    
+    #20; // Segunda instrução
+    $display("%4tns | %h | %h", $time, PC_out, ULA_out);
+    
+    #20; // Terceira
+    $display("%4tns | %h | %h", $time, PC_out, ULA_out);
+    
+    #20; // Quarta
+    $display("%4tns | %h | %h", $time, PC_out, ULA_out);
+    
+    // 4. Roda o resto
+    #2000;
+    
+    $display("\n---- VALORES FINAIS!: ---");
+    $display("PC final: %h", PC_out);
+    $display("ULA final: %h (%d decimal)", ULA_out, ULA_out);
+    
+   
+  end
 endmodule
